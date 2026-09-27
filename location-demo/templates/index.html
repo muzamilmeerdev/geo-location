@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>GeoRegister | Location Registration</title>
+    <title>GeoRegister | Smart Registration</title>
 
     <link
         rel="stylesheet"
@@ -16,41 +16,625 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
     >
+
+    <style>
+        /* =====================================================
+           PREMIUM RGB DASHBOARD + SUCCESS UI
+        ===================================================== */
+
+        :root {
+            --rgb1: #7c3cff;
+            --rgb2: #00e5ff;
+            --rgb3: #ff2bd6;
+            --dark: #070914;
+            --card: rgba(12, 15, 31, .82);
+            --border: rgba(255,255,255,.10);
+            --text: #f7f8ff;
+            --muted: #9da4bd;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 15% 20%, rgba(124,60,255,.16), transparent 30%),
+                radial-gradient(circle at 85% 25%, rgba(0,229,255,.12), transparent 30%),
+                radial-gradient(circle at 50% 90%, rgba(255,43,214,.10), transparent 35%),
+                #050711;
+        }
+
+        /* RGB animated border */
+
+        .rgb-border {
+            position: relative;
+            border-radius: 22px;
+            isolation: isolate;
+        }
+
+        .rgb-border::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            z-index: -1;
+            border-radius: inherit;
+            background: linear-gradient(
+                90deg,
+                var(--rgb1),
+                var(--rgb2),
+                var(--rgb3),
+                var(--rgb1)
+            );
+            background-size: 300% 300%;
+            animation: rgbMove 7s linear infinite;
+            opacity: .8;
+        }
+
+        .rgb-border::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            z-index: -1;
+            border-radius: inherit;
+            background: #090c19;
+        }
+
+        @keyframes rgbMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* =====================================================
+           SUCCESS MODAL
+        ===================================================== */
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            background: rgba(2,4,12,.82);
+            backdrop-filter: blur(18px);
+
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+
+            transition: .35s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .success-card {
+            width: min(520px, 100%);
+            padding: 34px;
+
+            text-align: center;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(17,21,43,.96),
+                    rgba(7,9,20,.98)
+                );
+
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 26px;
+
+            box-shadow:
+                0 30px 100px rgba(0,0,0,.65),
+                0 0 80px rgba(124,60,255,.13);
+
+            transform: translateY(25px) scale(.96);
+            transition: .4s cubic-bezier(.2,.8,.2,1);
+        }
+
+        .modal.show .success-card {
+            transform: translateY(0) scale(1);
+        }
+
+        .success-icon {
+            width: 76px;
+            height: 76px;
+
+            margin: 0 auto 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            font-size: 34px;
+            font-weight: 800;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #7c3cff,
+                    #00d9ff
+                );
+
+            box-shadow:
+                0 0 25px rgba(124,60,255,.5),
+                0 0 60px rgba(0,229,255,.15);
+        }
+
+        .success-label {
+            display: inline-block;
+
+            margin-bottom: 10px;
+
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+
+            color: #8defff;
+        }
+
+        .success-card h2 {
+            margin: 5px 0 12px;
+
+            font-size: 32px;
+            color: white;
+        }
+
+        .success-card > p {
+            margin: 0 auto 22px;
+
+            max-width: 400px;
+
+            line-height: 1.6;
+            color: #aeb5cc;
+        }
+
+        .dashboard-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+
+            gap: 12px;
+
+            margin-bottom: 22px;
+        }
+
+        .dashboard-info > div {
+            padding: 15px;
+
+            text-align: left;
+
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 14px;
+        }
+
+        .dashboard-info span {
+            display: block;
+
+            margin-bottom: 6px;
+
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+
+            color: #7f89a6;
+        }
+
+        .dashboard-info strong {
+            display: block;
+
+            color: white;
+            font-size: 13px;
+
+            word-break: break-word;
+        }
+
+        .dashboard-btn {
+            width: 100%;
+            min-height: 52px;
+
+            border: 0;
+            border-radius: 14px;
+
+            color: white;
+
+            font-weight: 800;
+            font-size: 14px;
+
+            cursor: pointer;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #713cff,
+                    #00bfe9,
+                    #ff2bd6,
+                    #713cff
+                );
+
+            background-size: 300% 100%;
+
+            animation: rgbButton 5s linear infinite;
+
+            box-shadow:
+                0 10px 30px rgba(88,70,255,.25);
+        }
+
+        @keyframes rgbButton {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        /* =====================================================
+           DASHBOARD
+        ===================================================== */
+
+        #dashboard {
+            display: none;
+
+            width: min(1180px, calc(100% - 30px));
+
+            margin: 40px auto 70px;
+        }
+
+        #dashboard.show {
+            display: block;
+            animation: dashboardIn .6s ease both;
+        }
+
+        @keyframes dashboardIn {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dashboard-shell {
+            padding: 28px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(14,17,35,.96),
+                    rgba(5,7,17,.98)
+                );
+
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 26px;
+
+            box-shadow:
+                0 30px 100px rgba(0,0,0,.45);
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding-bottom: 25px;
+            margin-bottom: 25px;
+
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .dashboard-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-logo {
+            width: 52px;
+            height: 52px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 16px;
+
+            font-size: 23px;
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #7c3cff,
+                    #00d9ff
+                );
+
+            box-shadow:
+                0 0 25px rgba(124,60,255,.3);
+        }
+
+        .dashboard-title h1 {
+            margin: 0;
+
+            font-size: clamp(24px, 4vw, 34px);
+            color: white;
+        }
+
+        .dashboard-title p {
+            margin: 5px 0 0;
+
+            color: #858da7;
+            font-size: 13px;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 10px 14px;
+
+            border-radius: 100px;
+
+            background: rgba(34,197,94,.08);
+            border: 1px solid rgba(34,197,94,.18);
+
+            color: #7cf5a2;
+
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .5px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #38ef7d;
+
+            box-shadow: 0 0 12px #38ef7d;
+        }
+
+        .dashboard-grid {
+            display: grid;
+
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+        .dash-card {
+            padding: 22px;
+
+            border-radius: 20px;
+
+            background: rgba(255,255,255,.025);
+            border: 1px solid rgba(255,255,255,.07);
+
+            transition: .25s ease;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+
+            border-color: rgba(124,60,255,.35);
+
+            box-shadow:
+                0 15px 45px rgba(0,0,0,.25);
+        }
+
+        .dash-card.full {
+            grid-column: 1 / -1;
+        }
+
+        .dash-card-label {
+            margin-bottom: 12px;
+
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+
+            color: #747d99;
+        }
+
+        .dash-card-value {
+            color: white;
+
+            font-size: 17px;
+            font-weight: 700;
+
+            word-break: break-word;
+        }
+
+        .dash-card-small {
+            margin-top: 6px;
+
+            color: #8c94ad;
+            font-size: 12px;
+        }
+
+        .location-dashboard {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 15px;
+        }
+
+        .location-value {
+            padding: 16px;
+
+            border-radius: 14px;
+
+            background: rgba(124,60,255,.06);
+            border: 1px solid rgba(124,60,255,.12);
+        }
+
+        .location-value span {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1px;
+
+            color: #7f89a6;
+        }
+
+        .location-value strong {
+            color: #dce1ff;
+            font-size: 14px;
+        }
+
+        .query-message {
+            margin-top: 18px;
+            padding: 18px;
+
+            border-radius: 16px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(124,60,255,.08),
+                    rgba(0,229,255,.05)
+                );
+
+            border: 1px solid rgba(124,60,255,.16);
+
+            color: #c7cde1;
+
+            line-height: 1.6;
+        }
+
+        .query-message strong {
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: white;
+        }
+
+        .dashboard-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 15px;
+
+            margin-top: 22px;
+            padding-top: 20px;
+
+            border-top: 1px solid rgba(255,255,255,.07);
+
+            color: #717a96;
+            font-size: 11px;
+        }
+
+        /* =====================================================
+           HIDE FORM AFTER SUCCESS
+        ===================================================== */
+
+        .main.hidden-after-registration {
+            display: none;
+        }
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dash-card.full {
+                grid-column: auto;
+            }
+
+            .dashboard-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .dashboard-shell {
+                padding: 18px;
+            }
+
+            .dashboard-info {
+                grid-template-columns: 1fr;
+            }
+
+            .location-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .success-card {
+                padding: 25px 20px;
+            }
+
+        }
+    </style>
 </head>
+
 
 <body>
 
 <div class="page">
 
-    <!-- NAVBAR -->
+    <!-- =====================================================
+         NAVBAR
+    ===================================================== -->
+
     <nav class="navbar">
 
         <div class="brand">
+
             <div class="brand-icon">⌖</div>
 
             <div>
                 <h2>GeoRegister</h2>
                 <span>Smart Location Registration</span>
             </div>
+
         </div>
 
         <div class="secure">
             <span class="dot"></span>
-            Local & Secure
+            Secure Registration
         </div>
 
     </nav>
 
 
-    <!-- MAIN -->
-    <main class="main">
+    <!-- =====================================================
+         REGISTRATION PAGE
+    ===================================================== -->
+
+    <main class="main" id="registrationMain">
 
         <!-- LEFT -->
+
         <section class="form-section">
 
             <div class="welcome">
 
-                <span class="badge">CREATE ACCOUNT</span>
+                <span class="badge">
+                    CREATE ACCOUNT
+                </span>
 
                 <h1>
                     Register your
@@ -62,7 +646,6 @@
                     using the interactive map.
                 </p>
 
-                <!-- IMPORTANT NOTICE -->
                 <p style="font-size:13px; opacity:.75;">
                     By submitting this form, you agree that the
                     information you provide, including your selected
@@ -73,6 +656,7 @@
 
 
             <!-- FORM -->
+
             <form id="registerForm">
 
                 <div class="input-row">
@@ -85,6 +669,7 @@
                             id="name"
                             type="text"
                             placeholder="Your full name"
+                            autocomplete="name"
                             required
                         >
 
@@ -99,6 +684,7 @@
                             id="phone"
                             type="tel"
                             placeholder="Phone number"
+                            autocomplete="tel"
                             required
                         >
 
@@ -115,6 +701,7 @@
                         id="email"
                         type="email"
                         placeholder="you@example.com"
+                        autocomplete="email"
                         required
                     >
 
@@ -122,6 +709,7 @@
 
 
                 <!-- LOCATION -->
+
                 <div class="location-heading">
 
                     <div>
@@ -129,7 +717,7 @@
                         <label>Choose Location</label>
 
                         <small>
-                            Search a place or use your current location
+                            Search a place or select a point on the map
                         </small>
 
                     </div>
@@ -146,6 +734,7 @@
 
 
                 <!-- SEARCH -->
+
                 <div class="search-box">
 
                     <span>⌕</span>
@@ -170,6 +759,7 @@
 
 
                 <!-- MAP -->
+
                 <div class="map-wrapper">
 
                     <div id="map"></div>
@@ -182,6 +772,7 @@
 
 
                 <!-- COORDINATES -->
+
                 <div class="location-info">
 
                     <div class="coordinate-card">
@@ -205,6 +796,7 @@
 
 
                 <!-- ADDRESS -->
+
                 <div class="address-card">
 
                     <div class="address-icon">
@@ -225,6 +817,7 @@
 
 
                 <!-- STATUS -->
+
                 <div
                     id="locationStatus"
                     class="status"
@@ -234,6 +827,7 @@
 
 
                 <!-- SUBMIT -->
+
                 <button
                     class="register-btn"
                     type="submit"
@@ -249,15 +843,16 @@
 
 
         <!-- RIGHT PANEL -->
+
         <section class="preview-section">
 
             <div class="preview-card">
 
                 <div class="preview-top">
 
-                    <span class="live-dot"></span>
+                    <span>⌖</span>
 
-                    LIVE LOCATION
+                    REGISTRATION PREVIEW
 
                 </div>
 
@@ -265,6 +860,7 @@
                 <div class="globe">
 
                     <div class="globe-ring ring1"></div>
+
                     <div class="globe-ring ring2"></div>
 
                     <div class="globe-center">
@@ -275,16 +871,15 @@
 
 
                 <h2>
-                    Your location,
+                    Choose your
                     <br>
-                    <span>your choice.</span>
+                    <span>registration point.</span>
                 </h2>
 
 
                 <p>
-                    Search for any place or allow browser
-                    location access. You can fine-tune the
-                    exact point directly on the map.
+                    Select a place from the search box or directly
+                    choose a point on the interactive map.
                 </p>
 
 
@@ -304,7 +899,7 @@
                     <div>✓</div>
 
                     <span>
-                        Search any location
+                        Location search
                     </span>
 
                 </div>
@@ -315,7 +910,7 @@
                     <div>✓</div>
 
                     <span>
-                        Address detection
+                        Address information
                     </span>
 
                 </div>
@@ -327,7 +922,210 @@
     </main>
 
 
-    <!-- SUCCESS MODAL -->
+    <!-- =====================================================
+         DASHBOARD
+    ===================================================== -->
+
+    <section id="dashboard">
+
+        <div class="dashboard-shell rgb-border">
+
+            <!-- HEADER -->
+
+            <div class="dashboard-header">
+
+                <div class="dashboard-title">
+
+                    <div class="dashboard-logo">
+                        ◈
+                    </div>
+
+                    <div>
+
+                        <h1>
+                            Welcome,
+                            <span id="dashName">User</span>
+                        </h1>
+
+                        <p>
+                            Your GeoRegister account dashboard
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="status-pill">
+
+                    <span class="status-dot"></span>
+
+                    REGISTRATION RECEIVED
+
+                </div>
+
+            </div>
+
+
+            <!-- USER DETAILS -->
+
+            <div class="dashboard-grid">
+
+                <div class="dash-card">
+
+                    <div class="dash-card-label">
+                        FULL NAME
+                    </div>
+
+                    <div
+                        class="dash-card-value"
+                        id="dashFullName"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="dash-card">
+
+                    <div class="dash-card-label">
+                        EMAIL ADDRESS
+                    </div>
+
+                    <div
+                        class="dash-card-value"
+                        id="dashEmail"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="dash-card">
+
+                    <div class="dash-card-label">
+                        PHONE NUMBER
+                    </div>
+
+                    <div
+                        class="dash-card-value"
+                        id="dashPhone"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="dash-card">
+
+                    <div class="dash-card-label">
+                        REGISTRATION STATUS
+                    </div>
+
+                    <div
+                        class="dash-card-value"
+                        style="color:#62f39a;"
+                    >
+                        Successfully Submitted
+                    </div>
+
+                    <div class="dash-card-small">
+                        Your information has been received.
+                    </div>
+
+                </div>
+
+
+                <!-- LOCATION -->
+
+                <div class="dash-card full">
+
+                    <div class="dash-card-label">
+                        SELECTED LOCATION
+                    </div>
+
+
+                    <div
+                        class="dash-card-value"
+                        id="dashAddress"
+                    >
+                        —
+                    </div>
+
+
+                    <div class="location-dashboard">
+
+                        <div class="location-value">
+
+                            <span>
+                                LATITUDE
+                            </span>
+
+                            <strong id="dashLat">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="location-value">
+
+                            <span>
+                                LONGITUDE
+                            </span>
+
+                            <strong id="dashLng">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="query-message">
+
+                        <strong>
+                            Your query has been received.
+                        </strong>
+
+                        Your registration details have been
+                        successfully submitted to our team.
+                        Our team will contact you shortly.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="dashboard-footer">
+
+                <span>
+                    GeoRegister • Registration Dashboard
+                </span>
+
+                <span>
+                    Registration completed successfully
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SUCCESS POPUP
+    ===================================================== -->
+
     <div
         id="successModal"
         class="modal"
@@ -339,16 +1137,20 @@
                 ✓
             </div>
 
+
             <span class="success-label">
                 REGISTRATION COMPLETE
             </span>
+
 
             <h2>
                 You're all set!
             </h2>
 
+
             <p>
-                Your registration has been successfully submitted.
+                Your query has been received by our team.
+                Our team will contact you shortly.
             </p>
 
 
@@ -379,10 +1181,10 @@
 
 
             <button
-                onclick="closeSuccess()"
+                onclick="openDashboard()"
                 class="dashboard-btn"
             >
-                Continue to Dashboard →
+                View My Dashboard →
             </button>
 
         </div>
@@ -407,18 +1209,17 @@ let selectedLng = null;
 let selectedAddress = "";
 
 
-/* =================================
+/* =====================================================
    WEB3FORMS
-   PUT YOUR ACCESS KEY HERE
-================================= */
+   PASTE YOUR ACCESS KEY BETWEEN THE QUOTES
+===================================================== */
 
-const WEB3FORMS_ACCESS_KEY =
-    "28531934-85f7-49f9-b138-60191e0308d8";
+const WEB3FORMS_ACCESS_KEY = "";
 
 
-/* =========================
+/* =====================================================
    MAP
-========================= */
+===================================================== */
 
 map = L.map("map").setView(
     [20.5937, 78.9629],
@@ -435,9 +1236,9 @@ L.tileLayer(
 ).addTo(map);
 
 
-/* =========================
+/* =====================================================
    MARKER
-========================= */
+===================================================== */
 
 function createMarker(lat, lng) {
 
@@ -469,13 +1270,15 @@ function createMarker(lat, lng) {
 
             }
         );
+
     }
+
 }
 
 
-/* =========================
+/* =====================================================
    UPDATE LOCATION
-========================= */
+===================================================== */
 
 async function updateLocation(lat, lng) {
 
@@ -498,12 +1301,13 @@ async function updateLocation(lat, lng) {
         lng.toFixed(6);
 
     await getAddress(lat, lng);
+
 }
 
 
-/* =========================
+/* =====================================================
    MAP CLICK
-========================= */
+===================================================== */
 
 map.on(
     "click",
@@ -518,9 +1322,9 @@ map.on(
 );
 
 
-/* =========================
+/* =====================================================
    MY LOCATION
-========================= */
+===================================================== */
 
 function getLocation() {
 
@@ -567,12 +1371,13 @@ function getLocation() {
         }
 
     );
+
 }
 
 
-/* =========================
+/* =====================================================
    SEARCH LOCATION
-========================= */
+===================================================== */
 
 async function searchLocation() {
 
@@ -678,12 +1483,13 @@ async function searchLocation() {
             </div>`;
 
     }
+
 }
 
 
-/* =========================
+/* =====================================================
    ENTER SEARCH
-========================= */
+===================================================== */
 
 document.getElementById(
     "searchInput"
@@ -703,9 +1509,9 @@ document.getElementById(
 );
 
 
-/* =========================
+/* =====================================================
    ADDRESS
-========================= */
+===================================================== */
 
 async function getAddress(lat, lng) {
 
@@ -776,12 +1582,13 @@ async function getAddress(lat, lng) {
         );
 
     }
+
 }
 
 
-/* =========================
+/* =====================================================
    STATUS
-========================= */
+===================================================== */
 
 function setStatus(message, type) {
 
@@ -797,12 +1604,13 @@ function setStatus(message, type) {
 
     status.className =
         "status " + type;
+
 }
 
 
-/* =========================
+/* =====================================================
    REGISTRATION
-========================= */
+===================================================== */
 
 document.getElementById(
     "registerForm"
@@ -867,10 +1675,9 @@ document.getElementById(
 
         try {
 
-            /* =========================
-               1. SEND TO FLASK
-               Localhost terminal output
-            ========================= */
+            /* =========================================
+               1. FLASK
+            ========================================= */
 
             const flaskResponse =
                 await fetch(
@@ -902,9 +1709,9 @@ document.getElementById(
             }
 
 
-            /* =========================
-               2. SEND TO WEB3FORMS
-            ========================= */
+            /* =========================================
+               2. WEB3FORMS
+            ========================================= */
 
             const formData =
                 new FormData();
@@ -979,9 +1786,56 @@ document.getElementById(
             }
 
 
-            /* =========================
-               SUCCESS UI
-            ========================= */
+            /* =========================================
+               DASHBOARD DATA
+            ========================================= */
+
+            document.getElementById(
+                "dashName"
+            ).textContent =
+                data.name;
+
+
+            document.getElementById(
+                "dashFullName"
+            ).textContent =
+                data.name;
+
+
+            document.getElementById(
+                "dashEmail"
+            ).textContent =
+                data.email;
+
+
+            document.getElementById(
+                "dashPhone"
+            ).textContent =
+                data.phone;
+
+
+            document.getElementById(
+                "dashAddress"
+            ).textContent =
+                data.address ||
+                "Location selected";
+
+
+            document.getElementById(
+                "dashLat"
+            ).textContent =
+                Number(data.latitude).toFixed(6);
+
+
+            document.getElementById(
+                "dashLng"
+            ).textContent =
+                Number(data.longitude).toFixed(6);
+
+
+            /* =========================================
+               SUCCESS POPUP
+            ========================================= */
 
             document.getElementById(
                 "successName"
@@ -1031,9 +1885,53 @@ document.getElementById(
 );
 
 
-/* =========================
-   CLOSE SUCCESS
-========================= */
+/* =====================================================
+   OPEN DASHBOARD
+===================================================== */
+
+function openDashboard() {
+
+    document.getElementById(
+        "successModal"
+    ).classList.remove(
+        "show"
+    );
+
+
+    document.getElementById(
+        "registrationMain"
+    ).classList.add(
+        "hidden-after-registration"
+    );
+
+
+    document.getElementById(
+        "dashboard"
+    ).classList.add(
+        "show"
+    );
+
+
+    setTimeout(
+        function() {
+
+            document.getElementById(
+                "dashboard"
+            ).scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        },
+        150
+    );
+
+}
+
+
+/* =====================================================
+   CLOSE MODAL
+===================================================== */
 
 function closeSuccess() {
 
