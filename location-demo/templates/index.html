@@ -1,1 +1,889 @@
-hg
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GeoRegister | Location Registration</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+
+        <div class="brand">
+            <div class="brand-icon">⌖</div>
+
+            <div>
+                <h2>GeoRegister</h2>
+                <span>Smart Location Registration</span>
+            </div>
+        </div>
+
+        <div class="secure">
+            <span class="dot"></span>
+            Local & Secure
+        </div>
+
+    </nav>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- LEFT -->
+        <section class="form-section">
+
+            <div class="welcome">
+                <span class="badge">CREATE ACCOUNT</span>
+
+                <h1>
+                    Register your
+                    <span>location.</span>
+                </h1>
+
+                <p>
+                    Enter your details and select your location
+                    using the interactive map.
+                </p>
+            </div>
+
+
+            <!-- FORM -->
+            <form id="registerForm">
+
+                <div class="input-row">
+
+                    <div class="input-group">
+
+                        <label>Full Name</label>
+
+                        <input
+                            id="name"
+                            type="text"
+                            placeholder="Your full name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label>Phone</label>
+
+                        <input
+                            id="phone"
+                            type="tel"
+                            placeholder="Phone number"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>Email Address</label>
+
+                    <input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- LOCATION SEARCH -->
+                <div class="location-heading">
+
+                    <div>
+                        <label>Choose Location</label>
+
+                        <small>
+                            Search a place or use your current location
+                        </small>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="locationBtn"
+                        onclick="getLocation()"
+                    >
+                        📍 My Location
+                    </button>
+
+                </div>
+
+
+                <div class="search-box">
+
+                    <span>⌕</span>
+
+                    <input
+                        id="searchInput"
+                        type="text"
+                        placeholder="Search city, area or place..."
+                    >
+
+                    <button
+                        type="button"
+                        onclick="searchLocation()"
+                    >
+                        Search
+                    </button>
+
+                </div>
+
+
+                <!-- SEARCH RESULTS -->
+                <div id="searchResults"></div>
+
+
+                <!-- MAP -->
+                <div class="map-wrapper">
+
+                    <div id="map"></div>
+
+                    <div class="map-tip">
+                        Drag the marker or click anywhere on the map
+                    </div>
+
+                </div>
+
+
+                <!-- LOCATION INFO -->
+                <div class="location-info">
+
+                    <div class="coordinate-card">
+
+                        <span>LATITUDE</span>
+
+                        <strong id="lat">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="coordinate-card">
+
+                        <span>LONGITUDE</span>
+
+                        <strong id="lng">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ADDRESS -->
+                <div class="address-card">
+
+                    <div class="address-icon">
+                        📍
+                    </div>
+
+                    <div>
+
+                        <span>SELECTED ADDRESS</span>
+
+                        <p id="address">
+                            No location selected yet.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STATUS -->
+                <div
+                    id="locationStatus"
+                    class="status"
+                >
+                    Waiting for location...
+                </div>
+
+
+                <!-- SUBMIT -->
+                <button
+                    class="register-btn"
+                    type="submit"
+                >
+                    <span>Create Account</span>
+                    <span>→</span>
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- RIGHT PANEL -->
+        <section class="preview-section">
+
+            <div class="preview-card">
+
+                <div class="preview-top">
+
+                    <span class="live-dot"></span>
+
+                    LIVE LOCATION
+
+                </div>
+
+
+                <div class="globe">
+
+                    <div class="globe-ring ring1"></div>
+                    <div class="globe-ring ring2"></div>
+
+                    <div class="globe-center">
+                        ⌖
+                    </div>
+
+                </div>
+
+
+                <h2>
+                    Your location,
+                    <br>
+                    <span>your choice.</span>
+                </h2>
+
+                <p>
+                    Search for any place or allow browser
+                    location access. You can fine-tune the
+                    exact point directly on the map.
+                </p>
+
+
+                <div class="feature">
+
+                    <div>✓</div>
+
+                    <span>
+                        Interactive map selection
+                    </span>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div>✓</div>
+
+                    <span>
+                        Search any location
+                    </span>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div>✓</div>
+
+                    <span>
+                        Address detection
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- SUCCESS MODAL -->
+    <div
+        id="successModal"
+        class="modal"
+    >
+
+        <div class="success-card">
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <span class="success-label">
+                REGISTRATION COMPLETE
+            </span>
+
+            <h2>
+                You're all set!
+            </h2>
+
+            <p>
+                Your registration has been successfully submitted.
+            </p>
+
+
+            <div class="dashboard-info">
+
+                <div>
+                    <span>NAME</span>
+                    <strong id="successName">—</strong>
+                </div>
+
+                <div>
+                    <span>LOCATION</span>
+                    <strong id="successAddress">—</strong>
+                </div>
+
+            </div>
+
+
+            <button
+                onclick="closeSuccess()"
+                class="dashboard-btn"
+            >
+                Continue to Dashboard →
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<script>
+
+let map;
+let marker;
+
+let selectedLat = null;
+let selectedLng = null;
+let selectedAddress = "";
+
+
+/* =========================
+   MAP
+========================= */
+
+map = L.map("map").setView(
+    [20.5937, 78.9629],
+    5
+);
+
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        attribution:
+            "&copy; OpenStreetMap contributors"
+    }
+).addTo(map);
+
+
+/* =========================
+   MARKER
+========================= */
+
+function createMarker(lat, lng) {
+
+    if (marker) {
+
+        marker.setLatLng([lat, lng]);
+
+    } else {
+
+        marker = L.marker(
+            [lat, lng],
+            {
+                draggable: true
+            }
+        ).addTo(map);
+
+
+        marker.on(
+            "dragend",
+            function(event) {
+
+                const pos =
+                    event.target.getLatLng();
+
+                updateLocation(
+                    pos.lat,
+                    pos.lng
+                );
+            }
+        );
+    }
+}
+
+
+/* =========================
+   UPDATE LOCATION
+========================= */
+
+async function updateLocation(lat, lng) {
+
+    selectedLat = lat;
+    selectedLng = lng;
+
+    createMarker(lat, lng);
+
+    map.setView(
+        [lat, lng],
+        16
+    );
+
+    document.getElementById("lat")
+        .textContent = lat.toFixed(6);
+
+    document.getElementById("lng")
+        .textContent = lng.toFixed(6);
+
+    await getAddress(lat, lng);
+}
+
+
+/* =========================
+   MAP CLICK
+========================= */
+
+map.on(
+    "click",
+    function(event) {
+
+        updateLocation(
+            event.latlng.lat,
+            event.latlng.lng
+        );
+
+    }
+);
+
+
+/* =========================
+   MY LOCATION
+========================= */
+
+function getLocation() {
+
+    if (!navigator.geolocation) {
+
+        setStatus(
+            "Geolocation is not supported.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    setStatus(
+        "Requesting location permission...",
+        "loading"
+    );
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+            updateLocation(
+                position.coords.latitude,
+                position.coords.longitude
+            );
+
+            setStatus(
+                "Current location selected.",
+                "success"
+            );
+
+        },
+
+        function() {
+
+            setStatus(
+                "Location permission was denied.",
+                "error"
+            );
+
+        }
+
+    );
+}
+
+
+/* =========================
+   SEARCH LOCATION
+========================= */
+
+async function searchLocation() {
+
+    const query =
+        document.getElementById(
+            "searchInput"
+        ).value.trim();
+
+
+    if (!query) {
+
+        return;
+    }
+
+
+    const resultsBox =
+        document.getElementById(
+            "searchResults"
+        );
+
+
+    resultsBox.innerHTML =
+        `<div class="search-loading">
+            Searching...
+        </div>`;
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/search-location?q=${encodeURIComponent(query)}`
+            );
+
+
+        const results =
+            await response.json();
+
+
+        resultsBox.innerHTML = "";
+
+
+        if (!results.length) {
+
+            resultsBox.innerHTML =
+                `<div class="no-results">
+                    No locations found.
+                </div>`;
+
+            return;
+        }
+
+
+        results.forEach(
+            function(result) {
+
+                const item =
+                    document.createElement(
+                        "button"
+                    );
+
+                item.className =
+                    "search-result";
+
+
+                item.innerHTML =
+                    `<span>📍</span>
+                     <span>${result.name}</span>`;
+
+
+                item.onclick =
+                    function() {
+
+                        updateLocation(
+                            result.lat,
+                            result.lon
+                        );
+
+                        resultsBox.innerHTML = "";
+
+                        document.getElementById(
+                            "searchInput"
+                        ).value =
+                            result.name;
+
+                    };
+
+
+                resultsBox.appendChild(item);
+
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        resultsBox.innerHTML =
+            `<div class="no-results">
+                Search failed.
+            </div>`;
+    }
+}
+
+
+/* ENTER SEARCH */
+
+document.getElementById(
+    "searchInput"
+).addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            searchLocation();
+        }
+
+    }
+);
+
+
+/* =========================
+   ADDRESS
+========================= */
+
+async function getAddress(lat, lng) {
+
+    setStatus(
+        "Finding address...",
+        "loading"
+    );
+
+
+    document.getElementById(
+        "address"
+    ).textContent =
+        "Loading address...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/reverse-geocode?lat=${lat}&lon=${lng}`
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (data.error) {
+
+            throw new Error(
+                data.error
+            );
+        }
+
+
+        selectedAddress =
+            data.display_name || "";
+
+
+        document.getElementById(
+            "address"
+        ).textContent =
+            selectedAddress ||
+            "Address unavailable.";
+
+
+        setStatus(
+            "Location ready for registration.",
+            "success"
+        );
+
+    }
+
+    catch (error) {
+
+        selectedAddress = "";
+
+        document.getElementById(
+            "address"
+        ).textContent =
+            "Address could not be found.";
+
+        setStatus(
+            "Location selected.",
+            "success"
+        );
+    }
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+function setStatus(message, type) {
+
+    const status =
+        document.getElementById(
+            "locationStatus"
+        );
+
+    status.textContent = message;
+
+    status.className =
+        "status " + type;
+}
+
+
+/* =========================
+   REGISTRATION
+========================= */
+
+document.getElementById(
+    "registerForm"
+).addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        if (
+            selectedLat === null ||
+            selectedLng === null
+        ) {
+
+            setStatus(
+                "Please select a location first.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        const data = {
+
+            name:
+                document.getElementById(
+                    "name"
+                ).value,
+
+            email:
+                document.getElementById(
+                    "email"
+                ).value,
+
+            phone:
+                document.getElementById(
+                    "phone"
+                ).value,
+
+            latitude:
+                selectedLat,
+
+            longitude:
+                selectedLng,
+
+            address:
+                selectedAddress
+        };
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/register",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(data)
+                    }
+                );
+
+
+            const result =
+                await response.json();
+
+
+            if (result.success) {
+
+                document.getElementById(
+                    "successName"
+                ).textContent =
+                    data.name;
+
+
+                document.getElementById(
+                    "successAddress"
+                ).textContent =
+                    data.address ||
+                    "Location selected";
+
+
+                document.getElementById(
+                    "successModal"
+                ).classList.add(
+                    "show"
+                );
+            }
+
+        }
+
+        catch (error) {
+
+            setStatus(
+                "Registration failed.",
+                "error"
+            );
+        }
+
+    }
+);
+
+
+/* =========================
+   CLOSE SUCCESS
+========================= */
+
+function closeSuccess() {
+
+    document.getElementById(
+        "successModal"
+    ).classList.remove(
+        "show"
+    );
+}
+
+</script>
+
+</body>
+</html
