@@ -49,6 +49,7 @@
         <section class="form-section">
 
             <div class="welcome">
+
                 <span class="badge">CREATE ACCOUNT</span>
 
                 <h1>
@@ -60,6 +61,14 @@
                     Enter your details and select your location
                     using the interactive map.
                 </p>
+
+                <!-- IMPORTANT NOTICE -->
+                <p style="font-size:13px; opacity:.75;">
+                    By submitting this form, you agree that the
+                    information you provide, including your selected
+                    location, will be sent for registration processing.
+                </p>
+
             </div>
 
 
@@ -112,15 +121,17 @@
                 </div>
 
 
-                <!-- LOCATION SEARCH -->
+                <!-- LOCATION -->
                 <div class="location-heading">
 
                     <div>
+
                         <label>Choose Location</label>
 
                         <small>
                             Search a place or use your current location
                         </small>
+
                     </div>
 
                     <button
@@ -134,6 +145,7 @@
                 </div>
 
 
+                <!-- SEARCH -->
                 <div class="search-box">
 
                     <span>⌕</span>
@@ -154,7 +166,6 @@
                 </div>
 
 
-                <!-- SEARCH RESULTS -->
                 <div id="searchResults"></div>
 
 
@@ -170,16 +181,14 @@
                 </div>
 
 
-                <!-- LOCATION INFO -->
+                <!-- COORDINATES -->
                 <div class="location-info">
 
                     <div class="coordinate-card">
 
                         <span>LATITUDE</span>
 
-                        <strong id="lat">
-                            —
-                        </strong>
+                        <strong id="lat">—</strong>
 
                     </div>
 
@@ -188,9 +197,7 @@
 
                         <span>LONGITUDE</span>
 
-                        <strong id="lng">
-                            —
-                        </strong>
+                        <strong id="lng">—</strong>
 
                     </div>
 
@@ -230,6 +237,7 @@
                 <button
                     class="register-btn"
                     type="submit"
+                    id="submitBtn"
                 >
                     <span>Create Account</span>
                     <span>→</span>
@@ -271,6 +279,7 @@
                     <br>
                     <span>your choice.</span>
                 </h2>
+
 
                 <p>
                     Search for any place or allow browser
@@ -346,13 +355,24 @@
             <div class="dashboard-info">
 
                 <div>
+
                     <span>NAME</span>
-                    <strong id="successName">—</strong>
+
+                    <strong id="successName">
+                        —
+                    </strong>
+
                 </div>
 
+
                 <div>
+
                     <span>LOCATION</span>
-                    <strong id="successAddress">—</strong>
+
+                    <strong id="successAddress">
+                        —
+                    </strong>
+
                 </div>
 
             </div>
@@ -385,6 +405,15 @@ let marker;
 let selectedLat = null;
 let selectedLng = null;
 let selectedAddress = "";
+
+
+/* =================================
+   WEB3FORMS
+   PUT YOUR ACCESS KEY HERE
+================================= */
+
+const WEB3FORMS_ACCESS_KEY =
+    "28531934-85f7-49f9-b138-60191e0308d8";
 
 
 /* =========================
@@ -437,6 +466,7 @@ function createMarker(lat, lng) {
                     pos.lat,
                     pos.lng
                 );
+
             }
         );
     }
@@ -460,10 +490,12 @@ async function updateLocation(lat, lng) {
     );
 
     document.getElementById("lat")
-        .textContent = lat.toFixed(6);
+        .textContent =
+        lat.toFixed(6);
 
     document.getElementById("lng")
-        .textContent = lng.toFixed(6);
+        .textContent =
+        lng.toFixed(6);
 
     await getAddress(lat, lng);
 }
@@ -551,7 +583,6 @@ async function searchLocation() {
 
 
     if (!query) {
-
         return;
     }
 
@@ -602,6 +633,9 @@ async function searchLocation() {
                         "button"
                     );
 
+
+                item.type = "button";
+
                 item.className =
                     "search-result";
 
@@ -642,11 +676,14 @@ async function searchLocation() {
             `<div class="no-results">
                 Search failed.
             </div>`;
+
     }
 }
 
 
-/* ENTER SEARCH */
+/* =========================
+   ENTER SEARCH
+========================= */
 
 document.getElementById(
     "searchInput"
@@ -659,6 +696,7 @@ document.getElementById(
             event.preventDefault();
 
             searchLocation();
+
         }
 
     }
@@ -700,6 +738,7 @@ async function getAddress(lat, lng) {
             throw new Error(
                 data.error
             );
+
         }
 
 
@@ -730,10 +769,12 @@ async function getAddress(lat, lng) {
         ).textContent =
             "Address could not be found.";
 
+
         setStatus(
             "Location selected.",
             "success"
         );
+
     }
 }
 
@@ -749,7 +790,10 @@ function setStatus(message, type) {
             "locationStatus"
         );
 
-    status.textContent = message;
+
+    status.textContent =
+        message;
+
 
     status.className =
         "status " + type;
@@ -788,17 +832,17 @@ document.getElementById(
             name:
                 document.getElementById(
                     "name"
-                ).value,
+                ).value.trim(),
 
             email:
                 document.getElementById(
                     "email"
-                ).value,
+                ).value.trim(),
 
             phone:
                 document.getElementById(
                     "phone"
-                ).value,
+                ).value.trim(),
 
             latitude:
                 selectedLat,
@@ -808,12 +852,27 @@ document.getElementById(
 
             address:
                 selectedAddress
+
         };
+
+
+        const submitBtn =
+            document.getElementById(
+                "submitBtn"
+            );
+
+
+        submitBtn.disabled = true;
 
 
         try {
 
-            const response =
+            /* =========================
+               1. SEND TO FLASK
+               Localhost terminal output
+            ========================= */
+
+            const flaskResponse =
                 await fetch(
                     "/register",
                     {
@@ -830,40 +889,142 @@ document.getElementById(
                 );
 
 
-            const result =
-                await response.json();
+            const flaskResult =
+                await flaskResponse.json();
 
 
-            if (result.success) {
+            if (!flaskResult.success) {
 
-                document.getElementById(
-                    "successName"
-                ).textContent =
-                    data.name;
-
-
-                document.getElementById(
-                    "successAddress"
-                ).textContent =
-                    data.address ||
-                    "Location selected";
-
-
-                document.getElementById(
-                    "successModal"
-                ).classList.add(
-                    "show"
+                throw new Error(
+                    "Flask registration failed."
                 );
+
             }
+
+
+            /* =========================
+               2. SEND TO WEB3FORMS
+            ========================= */
+
+            const formData =
+                new FormData();
+
+
+            formData.append(
+                "access_key",
+                WEB3FORMS_ACCESS_KEY
+            );
+
+            formData.append(
+                "subject",
+                "New GeoRegister Submission"
+            );
+
+            formData.append(
+                "from_name",
+                "GeoRegister"
+            );
+
+            formData.append(
+                "name",
+                data.name
+            );
+
+            formData.append(
+                "email",
+                data.email
+            );
+
+            formData.append(
+                "phone",
+                data.phone
+            );
+
+            formData.append(
+                "latitude",
+                data.latitude
+            );
+
+            formData.append(
+                "longitude",
+                data.longitude
+            );
+
+            formData.append(
+                "address",
+                data.address
+            );
+
+
+            const emailResponse =
+                await fetch(
+                    "https://api.web3forms.com/submit",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+
+            const emailResult =
+                await emailResponse.json();
+
+
+            if (!emailResult.success) {
+
+                throw new Error(
+                    "Email submission failed."
+                );
+
+            }
+
+
+            /* =========================
+               SUCCESS UI
+            ========================= */
+
+            document.getElementById(
+                "successName"
+            ).textContent =
+                data.name;
+
+
+            document.getElementById(
+                "successAddress"
+            ).textContent =
+                data.address ||
+                "Location selected";
+
+
+            document.getElementById(
+                "successModal"
+            ).classList.add(
+                "show"
+            );
+
+
+            setStatus(
+                "Registration submitted successfully.",
+                "success"
+            );
 
         }
 
         catch (error) {
 
+            console.error(error);
+
             setStatus(
-                "Registration failed.",
+                "Registration failed. Please try again.",
                 "error"
             );
+
+        }
+
+        finally {
+
+            submitBtn.disabled = false;
+
         }
 
     }
@@ -881,9 +1042,10 @@ function closeSuccess() {
     ).classList.remove(
         "show"
     );
+
 }
 
 </script>
 
 </body>
-</html
+</html>
